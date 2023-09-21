@@ -1,23 +1,42 @@
-import { FileVideo, Github, Upload, Wand2 } from "lucide-react";
+import { Github, Menu } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Separator } from "./components/ui/separator";
 import { Textarea } from "./components/ui/textarea";
-import { Label } from "./components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./components/ui/select";
-import { Slider } from "./components/ui/slider";
+
+import { useState } from "react";
+import { useCompletion } from "ai/react";
+
+import { Drawer } from "./components/Drawer";
+import { Actions } from "./components/Actions";
 
 export function App() {
+  const [temperature, setTemperature] = useState(0.5);
+  const [videoId, setVideoId] = useState<string | null>();
+  const [openSide, setOpenSide] = useState(false);
+
+  const {
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    completion,
+    isLoading,
+  } = useCompletion({
+    api: `${import.meta.env.VITE_APP_API_SERVER}/ai/generate`,
+    body: {
+      videoId,
+      temperature,
+    },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="px-6 py-3 flex items-center justify-between border-b">
         <h1 className="text-xl font-bold">upload.ai</h1>
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <span className="text-sm text-muted-foreground">
             Desenvolvido com S2 no NLW da Rocketseat
           </span>
@@ -29,6 +48,15 @@ export function App() {
             Github
           </Button>
         </div>
+        <div className="flex md:hidden">
+          <Button
+            className="w-auto h-0 p-0 m-0"
+            variant="ghost"
+            onClick={() => setOpenSide(!openSide)}
+          >
+            <Menu className="" />
+          </Button>
+        </div>
       </div>
       <main className="flex-1 p-6 flex gap-6">
         <div className="flex flex-col flex-1 gap-4">
@@ -36,10 +64,13 @@ export function App() {
             <Textarea
               className="resize-none p-4 leading-relaxed"
               placeholder="Inclua o prompt para a IA..."
+              value={input}
+              onChange={handleInputChange}
             />
             <Textarea
               className="resize-none p-4 leading-relaxed"
               placeholder="Resultado gerado pela IA..."
+              value={completion}
               readOnly
             />
           </div>
@@ -50,86 +81,16 @@ export function App() {
             selecionado.
           </p>
         </div>
-        <aside className="w-80 space-y-6">
-          <form className="space-y-5">
-            <label
-              htmlFor="video"
-              className="border flex w-full rounded-md aspect-video cursor-pointer border-dashed text-sm flex-col gap-2 items-center justify-center text-muted-foreground hover:bg-primary/5"
-            >
-              <FileVideo className="h-4 w-4" />
-              Selecione um vídeo
-            </label>
-            <input
-              type="file"
-              id="video"
-              accept="video/mp4"
-              className="sr-only"
-            />
-            <Separator />
-            <div className="space-y-2">
-              <Label htmlFor="transcription-prompt">
-                Prompt de transcrição
-              </Label>
-              <Textarea
-                id="transcription-prompt"
-                className="h-20 resize-none leading-relaxed"
-                placeholder="Inclua palavras-chave mencionadas no vídeo separadas por virgula (,)"
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Carregar vídeo <Upload className="h-4 w-4 ml-2" />
-            </Button>
-          </form>
-          <Separator />
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label>Prompt</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um prompt..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="title">Título do Youtube</SelectItem>
-                  <SelectItem value="description">
-                    Descrição do Youtube
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Modelo</Label>
-              <Select disabled defaultValue="gtp3.5">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gtp3.5">GPT 3.5-turbo 16k</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="block text-xs text-muted-foreground italic">
-                Você poderá customizar essa opção em breve
-              </span>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <Label>Temperatura</Label>
-              <Slider min={0} max={1} step={0.1} />
-              <span className="block text-xs text-muted-foreground italic leading-relaxed">
-                Valores mais altos tendem a deixar o resultado mais criativo e
-                com possíveis erros
-              </span>
-            </div>
-
-            <Separator />
-
-            <Button type="submit" className="w-full">
-              Executar <Wand2 className="h-4 w-4 ml-2" />
-            </Button>
-          </form>
-        </aside>
+        <Drawer openSide={openSide} onSetOpenSide={setOpenSide}>
+          <Actions
+            setInput={setInput}
+            onHandleSubmit={handleSubmit}
+            isLoading={isLoading}
+            temperature={temperature}
+            onSetTemperature={setTemperature}
+            onSetVideoId={setVideoId}
+          />
+        </Drawer>
       </main>
     </div>
   );
