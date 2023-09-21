@@ -35,10 +35,10 @@ export function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="px-6 py-3 flex items-center justify-between border-b">
-        <h1 className="text-xl font-bold">upload.ai</h1>
+        <h1 className="text-xl font-bold">Transcriba-video</h1>
         <div className="hidden md:flex items-center gap-3">
           <span className="text-sm text-muted-foreground">
-            Desenvolvido com S2 no NLW da Rocketseat
+            Desenvolvido com 💙 💚 💛
           </span>
 
           <Separator orientation="vertical" className="h-6" />
